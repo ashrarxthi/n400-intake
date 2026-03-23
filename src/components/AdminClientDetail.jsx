@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase.js'
 import { downloadFDF } from '../utils/generateFDF.js'
+import N400Preview from './N400Preview.jsx'
 
 const STATUS_OPTIONS = ['in_progress', 'submitted', 'in_review', 'complete']
 const STATUS_LABELS = { in_progress: 'In Progress', submitted: 'Submitted', in_review: 'In Review', complete: 'Complete' }
@@ -140,6 +141,7 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showPdfInstructions, setShowPdfInstructions] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const name = [data.section_personal?.first_name, data.section_personal?.last_name].filter(Boolean).join(' ') || 'Client'
 
@@ -179,7 +181,11 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
           {saved && <span style={{ fontSize: '0.78rem', color: '#4ade80' }}>✓ Saved</span>}
           {saving && <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>Saving…</span>}
           <button
-            onClick={() => {
+            onClick={() => setShowPreview(true)}
+            style={{ padding: '0.5rem 1.1rem', background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            👁 Form Reference
+          </button>
               downloadFDF({ ...data, section_personal: { ...data.section_personal }, section_contact: data.section_contact, section_physical: data.section_physical, section_marital: data.section_marital, section_children: data.section_children, section_employment: data.section_employment, section_travel: data.section_travel, section_background: data.section_background }, name)
               setShowPdfInstructions(true)
               setTimeout(() => setShowPdfInstructions(false), 8000)
@@ -198,9 +204,9 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
 
         {showPdfInstructions && (
           <div style={{ background: '#fdf8ee', border: '1px solid #f0d080', borderRadius: 10, padding: '1.1rem 1.5rem', marginBottom: '1.25rem', fontSize: '0.875rem', color: '#7a5800' }}>
-            <strong>✓ FDF file downloaded!</strong> Now run this command in your terminal to generate the filled N-400 PDF:
+            <strong>✓ FDF file downloaded!</strong> Run this command in your terminal to generate the filled N-400 PDF (update the path to where your n-400.pdf is saved):
             <div style={{ marginTop: '0.5rem', background: '#fff8e0', borderRadius: 6, padding: '0.6rem 1rem', fontFamily: 'monospace', fontSize: '0.82rem', color: '#5a3f00', wordBreak: 'break-all' }}>
-              pdftk /path/to/n-400.pdf fill_form ~/Downloads/{name.replace(/\s+/g, '_')}_N400.fdf output ~/Desktop/{name.replace(/\s+/g, '_')}_filled_N400.pdf flatten
+              pdftk /Users/alexarathi/Desktop/Codin/N400Intake/app/public/n-400.pdf fill_form ~/Downloads/{name.replace(/\s+/g, '_')}_N400.fdf output ~/Desktop/{name.replace(/\s+/g, '_')}_filled_N400.pdf flatten
             </div>
           </div>
         )}
@@ -335,6 +341,13 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
           </button>
         </div>
       </div>
+
+      {showPreview && (
+        <N400Preview
+          submission={data}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   )
 }
