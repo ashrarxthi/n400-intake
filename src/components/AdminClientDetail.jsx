@@ -186,7 +186,9 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
           >
             👁 Form Reference
           </button>
-              downloadFDF({ ...data, section_personal: { ...data.section_personal }, section_contact: data.section_contact, section_physical: data.section_physical, section_marital: data.section_marital, section_children: data.section_children, section_employment: data.section_employment, section_travel: data.section_travel, section_background: data.section_background }, name)
+          <button
+            onClick={() => {
+              downloadFDF(data, name)
               setShowPdfInstructions(true)
               setTimeout(() => setShowPdfInstructions(false), 8000)
             }}
