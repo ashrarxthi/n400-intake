@@ -77,7 +77,24 @@ export default function IntakeForm({ session, onExit }) {
 
   const StepComponent = STEPS[currentStep].component
   const totalSteps = STEPS.length
-  const pct = Math.round(((currentStep) / (totalSteps - 1)) * 100)
+
+  // Calculate how filled each section is
+  const getSectionCompletion = (field) => {
+    if (!field) return 100
+    const section = formData[field]
+    if (!section || typeof section !== 'object') return 0
+    const vals = Object.values(section).filter(v => v !== null && v !== undefined)
+    const filled = vals.filter(v => {
+      if (Array.isArray(v)) return v.length > 0
+      if (typeof v === 'object') return Object.keys(v).length > 0
+      return String(v).trim() !== ''
+    })
+    return vals.length === 0 ? 0 : Math.round((filled.length / vals.length) * 100)
+  }
+
+  const overallPct = Math.round(
+    STEPS.slice(0, -1).reduce((sum, s) => sum + getSectionCompletion(s.field), 0) / (STEPS.length - 1)
+  )
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
@@ -99,7 +116,7 @@ export default function IntakeForm({ session, onExit }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {saving && <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>Saving…</span>}
-          {!saving && currentStep > 0 && <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>Progress saved</span>}
+          {!saving && <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>{overallPct}% complete</span>}
           <button onClick={onExit} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', borderRadius: 6, padding: '0.35rem 0.85rem', fontSize: '0.8rem', cursor: 'pointer' }}>
             Exit
           </button>
@@ -108,32 +125,46 @@ export default function IntakeForm({ session, onExit }) {
 
       {/* Progress bar */}
       <div style={{ height: 4, background: '#e2e8f0' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: '#b8963e', transition: 'width 0.4s ease' }} />
+        <div style={{ height: '100%', width: `${overallPct}%`, background: '#b8963e', transition: 'width 0.4s ease' }} />
       </div>
 
-      {/* Step tabs */}
+      {/* Step tabs — all clickable at any time */}
       <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', overflowX: 'auto' }}>
         <div style={{ display: 'flex', maxWidth: 900, margin: '0 auto', padding: '0 1rem' }}>
-          {STEPS.map((step, i) => (
-            <button
-              key={i}
-              onClick={() => i < currentStep && setCurrentStep(i)}
-              style={{
-                padding: '0.85rem 0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: i === currentStep ? 600 : 400,
-                color: i === currentStep ? '#0f2044' : i < currentStep ? '#b8963e' : '#94a3b8',
-                background: 'none',
-                border: 'none',
-                borderBottom: i === currentStep ? '2px solid #0f2044' : '2px solid transparent',
-                cursor: i < currentStep ? 'pointer' : 'default',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s',
-              }}
-            >
-              {i < currentStep ? '✓ ' : ''}{step.label}
-            </button>
-          ))}
+          {STEPS.map((step, i) => {
+            const pct = getSectionCompletion(step.field)
+            const isActive = i === currentStep
+            const isDone = pct === 100 && i !== currentStep
+            return (
+              <button
+                key={i}
+                onClick={() => setCurrentStep(i)}
+                style={{
+                  padding: '0.75rem 0.75rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? '#0f2044' : isDone ? '#b8963e' : '#94a3b8',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: isActive ? '2px solid #0f2044' : '2px solid transparent',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                }}
+              >
+                <span>{isDone ? '✓ ' : ''}{step.label}</span>
+                {step.field && pct > 0 && pct < 100 && (
+                  <div style={{ width: 40, height: 2, background: '#e2e8f0', borderRadius: 1 }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: '#b8963e', borderRadius: 1 }} />
+                  </div>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 

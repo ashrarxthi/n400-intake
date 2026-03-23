@@ -181,8 +181,7 @@ export default function StepReview({ allData, onBack, onSubmit }) {
       <div style={{ ...card, background: '#0f2044', border: 'none' }}>
         <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>Ready to Submit?</h2>
         <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-          By submitting, you confirm that all information provided is complete and accurate to the best of your knowledge.
-          Your attorney will review everything before filing.
+          You can submit at any time — even if some sections are incomplete. Your attorney will follow up if anything is missing.
         </p>
         <div style={btnRow}>
           <button style={{ padding: '0.8rem 1.5rem', background: 'transparent', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, fontSize: '0.95rem', cursor: 'pointer' }} onClick={onBack}>

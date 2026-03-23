@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { card, sectionTitle, sectionDesc, grid2, grid3, btnRow, btnPrimary, btnSecondary, divider, errorStyle, Input, Select, YesNo } from '../FormComponents.jsx'
+import { card, sectionTitle, sectionDesc, grid2, grid3, btnRow, btnPrimary, Input, YesNo } from '../FormComponents.jsx'
 
-export default function Step1Personal({ data, onNext, onBack, isFirst }) {
+export default function Step1Personal({ data, onNext, isFirst }) {
   const [f, setF] = useState({
     last_name: '', first_name: '', middle_name: '', maiden_name: '',
     other_names: '', name_change: '', new_name: '',
@@ -10,22 +10,11 @@ export default function Step1Personal({ data, onNext, onBack, isFirst }) {
     date_permanent_resident: '', green_card_method: '',
     ...data
   })
-  const [error, setError] = useState('')
-
   const set = k => e => setF(p => ({ ...p, [k]: e.target.value }))
   const setVal = (k, v) => setF(p => ({ ...p, [k]: v }))
 
-  const handleNext = () => {
-    if (!f.last_name || !f.first_name || !f.a_number) {
-      setError('Please fill in all required fields (Last Name, First Name, A-Number).')
-      return
-    }
-    onNext(f)
-  }
-
   return (
     <div>
-      {error && <div style={errorStyle}>{error}</div>}
 
       <div style={card}>
         <h2 style={sectionTitle}>Personal Information</h2>
@@ -109,7 +98,7 @@ export default function Step1Personal({ data, onNext, onBack, isFirst }) {
 
       <div style={btnRow}>
         <div />
-        <button style={btnPrimary} onClick={handleNext}>Save &amp; Continue →</button>
+        <button style={btnPrimary} onClick={() => onNext(f)}>Save &amp; Continue →</button>
       </div>
     </div>
   )
