@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase.js'
+import { downloadFDF } from '../utils/generateFDF.js'
 
 const STATUS_OPTIONS = ['in_progress', 'submitted', 'in_review', 'complete']
 const STATUS_LABELS = { in_progress: 'In Progress', submitted: 'Submitted', in_review: 'In Review', complete: 'Complete' }
@@ -138,6 +139,7 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
   const [notes, setNotes] = useState(submission.attorney_notes || '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [showPdfInstructions, setShowPdfInstructions] = useState(false)
 
   const name = [data.section_personal?.first_name, data.section_personal?.last_name].filter(Boolean).join(' ') || 'Client'
 
@@ -176,6 +178,16 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {saved && <span style={{ fontSize: '0.78rem', color: '#4ade80' }}>✓ Saved</span>}
           {saving && <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>Saving…</span>}
+          <button
+            onClick={() => {
+              downloadFDF({ ...data, section_personal: { ...data.section_personal }, section_contact: data.section_contact, section_physical: data.section_physical, section_marital: data.section_marital, section_children: data.section_children, section_employment: data.section_employment, section_travel: data.section_travel, section_background: data.section_background }, name)
+              setShowPdfInstructions(true)
+              setTimeout(() => setShowPdfInstructions(false), 8000)
+            }}
+            style={{ padding: '0.5rem 1.1rem', background: 'rgba(184,150,62,0.15)', color: '#f0d080', border: '1px solid rgba(184,150,62,0.4)', borderRadius: 7, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            ↓ Generate N-400 FDF
+          </button>
           <button onClick={handleSave} disabled={saving} style={{ padding: '0.5rem 1.25rem', background: '#b8963e', color: '#fff', border: 'none', borderRadius: 7, fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}>
             Save Changes
           </button>
@@ -183,6 +195,15 @@ export default function AdminClientDetail({ submission, onBack, onUpdated }) {
       </div>
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '2rem 1.5rem' }}>
+
+        {showPdfInstructions && (
+          <div style={{ background: '#fdf8ee', border: '1px solid #f0d080', borderRadius: 10, padding: '1.1rem 1.5rem', marginBottom: '1.25rem', fontSize: '0.875rem', color: '#7a5800' }}>
+            <strong>✓ FDF file downloaded!</strong> Now run this command in your terminal to generate the filled N-400 PDF:
+            <div style={{ marginTop: '0.5rem', background: '#fff8e0', borderRadius: 6, padding: '0.6rem 1rem', fontFamily: 'monospace', fontSize: '0.82rem', color: '#5a3f00', wordBreak: 'break-all' }}>
+              pdftk /path/to/n-400.pdf fill_form ~/Downloads/{name.replace(/\s+/g, '_')}_N400.fdf output ~/Desktop/{name.replace(/\s+/g, '_')}_filled_N400.pdf flatten
+            </div>
+          </div>
+        )}
 
         {/* Status + Notes */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
