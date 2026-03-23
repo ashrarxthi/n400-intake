@@ -143,7 +143,7 @@ export default function IntakeForm({ session, onExit }) {
                   padding: '0.75rem 0.75rem 0.6rem',
                   fontSize: '0.75rem',
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0f2044' : isDone ? '#b8963e' : '#94a3b8',
+                  color: isActive ? '#0f2044' : pct === 100 ? '#16a34a' : pct > 0 ? '#b8963e' : '#94a3b8',
                   background: 'none',
                   border: 'none',
                   borderBottom: isActive ? '2px solid #0f2044' : '2px solid transparent',
@@ -156,7 +156,11 @@ export default function IntakeForm({ session, onExit }) {
                   gap: '0.3rem',
                 }}
               >
-                <span>{isDone ? '✓ ' : ''}{step.label}</span>
+                <span>
+                  {step.field && pct === 100 && !isActive && <span style={{ color: '#16a34a', marginRight: 3 }}>✓</span>}
+                  {step.field && pct > 0 && pct < 100 && !isActive && <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#b8963e', marginRight: 4, verticalAlign: 'middle' }} />}
+                  {step.label}
+                </span>
                 {step.field && pct > 0 && pct < 100 && (
                   <div style={{ width: 40, height: 2, background: '#e2e8f0', borderRadius: 1 }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: '#b8963e', borderRadius: 1 }} />
